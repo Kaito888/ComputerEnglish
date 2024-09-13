@@ -1,38 +1,28 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+
+import useFigureOptions from "./useFigureOptions.ts";
 
 import Math3D, {
-  Point, Light,
-  Cube, Sphere, Cone, CylinderEll, CylinderHyp, CylinderPar, Ellipsoid, HyperboloidOne, HyperboloidTwo, ParaboloidEll, ParaboloidHyp, Torus,
+  Point,
+  Light,
+  Sphere,
+  Torus,
 } from "../../modules/Math3D";
-import useCanvas from "../../modules/Canvas/useCanvas";
+import useCanvas from "../../modules/Canvas/useCanvas.ts";
 
 import Graph3DUI from "./Graph3DUI/Graph3DUI";
 
 const Graph3D = () => {
-  window.requestAnimFrame = (function () {
-    return (
-      window.requestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      window.oRequestAnimationFrame ||
-      window.msRequestAnimationFrame ||
-      function (callback) {
-        window.setTimeout(callback, 100 / 6);
-      }
-    );
-  })();
-
   const zoom = 0.8;
   const rotate = 0.01;
-  const drag = 0.05;
   let canMove = false;
-  let canDrag = false;
   let canAnimate = true;
 
   const show = {
     showPoints: false,
     showEdges: false,
     showPolygons: true,
-  }
+  };
   let canPrintShadows = true;
 
   const WIN = {
@@ -45,111 +35,86 @@ const Graph3D = () => {
   };
   let LIGHT = [
     new Light(-10, 20, 0, 8000, "#ff0000"),
-    new Light(10, -20, -10, 5000, '#0000ff'),
+    new Light(10, -20, -10, 5000, "#0000ff"),
   ];
-
   let scene = [];
-
   const math3D = new Math3D({ WIN: WIN });
-
+  const figureOptions = useFigureOptions();
   let canvas = null;
-  const canvas3D = useRef(null);
 
   useEffect(() => {
     canvas = Canvas({
-      ref: canvas3D,
+      id: "canvas3D",
       width: 800,
       height: 800,
-      WIN: WIN,
+      WIN,
       callbacks: {
-        wheel: (event) => wheel(event),
-        mouseUp: () => mouseUp(),
-        mouseDown: () => mouseDown(),
-        dblclick: () => dblclick(),
-        mouseMove: (event) => mouseMove(event),
-        mouseLeave: () => mouseLeave(),
+        wheel,
+        mouseUp,
+        mouseDown,
+        mouseMove,
+        mouseLeave,
       },
     });
 
+    setSolarSystem();
+
     const interval = setInterval(() => {
-      scene.forEach((figure) => {
-        doAnimation(figure);
-        figure.animated = false;
-      });
+      if (canAnimate) {
+        scene.forEach((figure) => {
+          doAnimation(figure);
+        });
+      }
     }, 30);
 
     return () => {
       clearInterval(interval);
       canvas = null;
-    }
-  })
+    };
+  });
 
   /* *************** */
   /* about callbacks */
   /* *************** */
 
   const wheel = (event) => {
-    const delta = event.wheelDelta > 0 ? 1 / zoom : zoom;
-
-    if (!canAnimate) {
+    if (canAnimate) {
+      const d = event.wheelDelta > 0 ? -zoom : zoom;
+      WIN.camera.z += d;
+      WIN.focus.z += d;
+    } else {
+      const delta = event.wheelDelta > 0 ? 1 / zoom : zoom;
       const matrix = math3D.zoom(delta);
 
       scene.forEach((scene) =>
         scene.points.forEach((point) => math3D.transform(matrix, point))
       );
-    } else {
-      const d = event.wheelDelta > 0 ? -zoom : zoom;
-      WIN.camera.z += d;
-      WIN.focus.z += d;
     }
-  }
+  };
   const mouseDown = () => {
     canMove = true;
-  }
+  };
   const mouseUp = () => {
     canMove = false;
-  }
-  const dblclick = () => {
-    canDrag = !canDrag;
-  }
+  };
   const mouseLeave = () => {
     canMove = false;
-    canDrag = false;
-  }
+  };
   const mouseMove = (event) => {
-    if (!canAnimate) {
-      if (canDrag) {
-        const { movementX, movementY } = event;
+    if (!canAnimate && canMove) {
+      const { movementX, movementY } = event;
 
-        const matrix = math3D.drag(
-          movementX * drag,
-          -movementY * drag
-        );
+      const matrixX = math3D.rotateOx(movementY * rotate);
+      const matrixY = math3D.rotateOy(movementX * rotate);
 
-        scene.forEach((figure) =>
-          figure.points.forEach((point) =>
-            math3D.transform(matrix, point)
-          )
-        );
-      } else if (canMove) {
-        const { movementX, movementY } = event;
-
-        const matrixX = math3D.rotateX(movementY * rotate);
-        const matrixY = math3D.rotateY(movementX * rotate);
-
-        scene.forEach((figure) =>
-          figure.points.forEach((point) =>
-            math3D.transform(matrixX, point)
-          )
-        );
-        scene.forEach((figure) =>
-          figure.points.forEach((point) =>
-            math3D.transform(matrixY, point)
-          )
-        );
-      }
+      scene.forEach((figure) =>
+        figure.points.forEach((point) => math3D.transform(matrixX, point))
+      );
+      scene.forEach((figure) =>
+        figure.points.forEach((point) => math3D.transform(matrixY, point))
+      );
     }
-  }
+  };
 
   /* *************** */
   /* about animation */
@@ -163,7 +128,7 @@ const Graph3D = () => {
     earth.points.forEach((point) => {
       point.x += 15;
     });
-    const matrix = math3D.rotateZ(250);
+    const matrix = math3D.rotateOz(250);
     moon.points.forEach((point) => {
       math3D.transform(matrix, point);
       point.x += 21;
@@ -176,36 +141,35 @@ const Graph3D = () => {
     math3D.calcCenter(earth);
     math3D.calcCenter(moon);
 
-    earth.setAnimation("rotateZ", 0.01);
-    earth.setAnimation("rotateZ", 0.01, new Point());
+    earth.setAnimation("rotateOz", 0.01);
+    earth.setAnimation("rotateOz", 0.01, new Point());
 
-    moon.setAnimation("rotateZ", 0.05, earth.center);
+    moon.setAnimation("rotateOz", 0.05, earth.center);
 
     scene = [];
     scene[0] = earth;
     scene[1] = moon;
-  }
+  };
 
   const doAnimation = (figure) => {
-    if (!figure.animated) {
-      figure.doAnimation(math3D);
-      figure.children.forEach(child => {
-        let animCount = 0;
-        figure.animations.forEach(anim => {
-          const { method, value, center } = anim;
-          if (center !== figure.center) {
-            scene[child].setAnimation(method, value, center);
-            animCount++;
-          }
-        })
-        doAnimation(scene[child]);
-        for (let i = 0; i < animCount; i++) {
-          scene[child].animations[scene[child].animations.length - i - 1].value = 0;
+    figure.doAnimation(math3D);
+    //!!!
+    figure.children.forEach((child) => {
+      let animCount = 0;
+      figure.animations.forEach((anim) => {
+        const { method, value, center } = anim;
+        if (center !== figure.center) {
+          scene[child].setAnimation(method, value, center);
+          animCount++;
         }
-      })
-      figure.animated = true;
-    }
-  }
+      });
+      doAnimation(scene[child]);
+      const num = scene[child].animations.length - 1;
+      for (let i = 0; i < animCount; i++) {
+        scene[child].dropAnimation(num - i);
+      }
+    });
+  };
 
   /* *********** */
   /* about print */
@@ -213,7 +177,7 @@ const Graph3D = () => {
 
   const clear = () => {
     if (canvas) canvas.clear("#C7CFFF");
-  }
+  };
 
   const printScene = (scene) => {
     if (show.showPolygons) {
@@ -239,10 +203,7 @@ const Graph3D = () => {
             Math.pow(light.y - polygon.center.y, 2) +
             Math.pow(light.z - polygon.center.z, 2)
           );
-          polygon.lumen[i] = math3D.calcIllumination(
-            distance,
-            light.lumen
-          );
+          polygon.lumen[i] = math3D.calcIllumination(distance, light.lumen);
         });
       });
 
@@ -313,15 +274,11 @@ const Graph3D = () => {
     if (show.showPoints) {
       scene.forEach((figure) => {
         figure.points.forEach((point) =>
-          canvas.point(
-            math3D.xs(point),
-            math3D.ys(point),
-            "#337"
-          )
+          canvas.point(math3D.xs(point), math3D.ys(point), "#337")
         );
       });
     }
-  }
+  };
 
   const renderScene = (FPS) => {
     if (canvas) {
@@ -330,7 +287,7 @@ const Graph3D = () => {
       canvas.textCanvas(FPS + " FPS", 10, 30);
       canvas.render();
     }
-  }
+  };
 
   /* ********** */
   /* about 3DUI */
@@ -338,119 +295,49 @@ const Graph3D = () => {
 
   const showHidePoints = (value) => {
     show.showPoints = value;
-  }
+  };
   const showHideEdges = (value) => {
     show.showEdges = value;
-  }
+  };
   const showHidePolygons = (value) => {
     show.showPolygons = value;
-  }
+  };
   const canDoAnimationHandler = (value) => {
     canAnimate = value;
     if (!value) {
-      scene.forEach(figure => figure.dropAnimation());
+      scene.forEach((figure) => figure.dropAnimations());
     }
-  }
+  };
   const canPrintShadowsHandler = (value) => {
     canPrintShadows = value;
-  }
+  };
 
   const figureChangeHandler = (value) => {
-    const figures = [
-      {
-        type: "Cube",
-        result: new Cube(),
-      }, {
-        type: "Sphere",
-        result: new Sphere(),
-      }, {
-        type: "Ellipsoid",
-        result: new Ellipsoid(),
-      }, {
-        type: "Cone",
-        result: new Cone(),
-      }, {
-        type: "HyperboloidOne",
-        result: new HyperboloidOne(),
-      }, {
-        type: "HyperboloidTwo",
-        result: new HyperboloidTwo(),
-      }, {
-        type: "ParaboloidHyp",
-        result: new ParaboloidHyp(),
-      }, {
-        type: "ParaboloidEll",
-        result: new ParaboloidEll(),
-      }, {
-        type: "CylinderEll",
-        result: new CylinderEll(),
-      }, {
-        type: "CylinderHyp",
-        result: new CylinderHyp(),
-      }, {
-        type: "CylinderPar",
-        result: new CylinderPar(),
-      }, {
-        type: "Torus",
-        result: new Torus(),
-      }
-    ]
-    if (value === "SolarSystem") setSolarSystem();
-    else figures.forEach(figure => {
-      if (figure.type === value) return scene = [figure.result];
-    })
-  }
+    if (value === "SolarSystem") {
+      setSolarSystem();
+    } else {
+      figureOptions.forEach((figure) => {
+        if (figure.type === value) {
+          scene = [figure.result];
+        }
+      });
+    }
+  };
 
   const figureColorChangeHandler = (value) => {
     const color = scene[0].polygons[0].hexToRgb(value);
-    scene.forEach(figure => figure.polygons.forEach(poly => poly.color = color));
-  }
+    scene.forEach((figure) =>
+      figure.polygons.forEach((poly) => (poly.color = color))
+    );
+  };
 
+  //!!!cant use hook in function but need to create figures w dif detalization every time
   const figureCountChangeHandler = (value) => {
-    const figures = [
-      {
-        type: "Cube",
-        result: new Cube(),
-      }, {
-        type: "Sphere",
-        result: new Sphere(value),
-      }, {
-        type: "Ellipsoid",
-        result: new Ellipsoid(value),
-      }, {
-        type: "Cone",
-        result: new Cone(value),
-      }, {
-        type: "HyperboloidOne",
-        result: new HyperboloidOne(value),
-      }, {
-        type: "HyperboloidTwo",
-        result: new HyperboloidTwo(value),
-      }, {
-        type: "ParaboloidHyp",
-        result: new ParaboloidHyp(value),
-      }, {
-        type: "ParaboloidEll",
-        result: new ParaboloidEll(value),
-      }, {
-        type: "CylinderEll",
-        result: new CylinderEll(value),
-      }, {
-        type: "CylinderHyp",
-        result: new CylinderHyp(value),
-      }, {
-        type: "CylinderPar",
-        result: new CylinderPar(value),
-      }, {
-        type: "Torus",
-        result: new Torus(value),
-      }
-    ]
     const fig = scene[0].constructor.name;
-    figures.forEach(figure => {
-      if (figure.type === fig) return scene = [figure.result];
+    figureOptions.forEach((figure) => {
+      if (figure.type === fig) return (scene = [figure.result]);
     });
-  }
+  };
 
   const clearScene = () => {
     LIGHT = [
@@ -459,9 +346,7 @@ const Graph3D = () => {
     ];
     scene = [];
     canAnimate = false;
-  }
-
-  setSolarSystem();
+  };
 
   const Canvas = useCanvas(renderScene);
 
@@ -482,9 +367,9 @@ const Graph3D = () => {
         figureCountChangeHandler={(value) => figureCountChangeHandler(value)}
         scene={scene}
       />
-      <canvas ref={canvas3D}></canvas>
+      <canvas id="canvas3D"></canvas>
     </div>
   );
-}
+};
 
 export default Graph3D;

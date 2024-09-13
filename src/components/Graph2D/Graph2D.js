@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import Graph2DUI from "./Graph2DUI/Graph2DUI";
-import useCanvas from "../../modules/Canvas/useCanvas";
-import Math2D from "../../modules/Math2D/Math2D";
+import useCanvas from "../../modules/Canvas/useCanvas.ts";
+import Math2D from "../../modules/Math2D/Math2D.ts";
 
 //из graph2dui функции сделать в компоненту
 
@@ -24,11 +24,10 @@ const Graph2D = () => {
   let canMove = false;
 
   let canvas = null;
-  const canvas2D = useRef(null);
 
   useEffect(() => {
     canvas = Canvas({
-      ref: canvas2D,
+      id: 'canvas2D',
       width: 800,
       height: 800,
       WIN,
@@ -94,7 +93,7 @@ const Graph2D = () => {
       if (canMove) {
         const { movementX, movementY } = event;
         WIN.left -= canvas.sx(movementX);
-        WIN.bottom += canvas.sy(movementY);
+        WIN.bottom -= canvas.sy(movementY);
       }
     }
   }
@@ -262,7 +261,7 @@ const Graph2D = () => {
         changeGraph={(width, color) => changeGraph(width, color)}
         changeZero={(num, c, segment) => changeZero(num, c, segment)}
       />
-      <canvas ref={canvas2D}></canvas>
+      <canvas id='canvas2D'></canvas>
     </>
   );
 };

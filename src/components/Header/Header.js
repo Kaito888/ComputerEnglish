@@ -1,18 +1,12 @@
 const Header = ({showComponent}) => {
     const tabs = [
         {
-            name: 'UniCalculator',
-            text: 'Калькулятор'
-        }, {
-            name: 'PolyCalculator',
-            text: 'Калькулятор полиномов'
-        }, {
-            name: 'Graph2D',
-            text: 'Графики'
-        }, {
-            name: 'Graph3D',
-            text: '3Д сцена'
-        },
+            name: 'Topic1',
+            text: 'Topic1'
+        } , {
+            name: 'Topic2',
+            text: 'Topic2'
+        }
     ];
 
     return (<div className='header'>
