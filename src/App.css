@@ -1,21 +1,29 @@
 body {
-  background: url('./asserts/bg16.png') no-repeat center center fixed;
+  font-size: 30px;
   background-size: cover;
 }
 
 button {
-  border: solid 2px rgb(54, 29, 196);
-  border-radius: 10px;
-  background:rgb(232, 228, 255);
+  width: 230px;
+  height: 80px;
+  margin: 15px;
+  font-size: 25px;
+
+  border: solid 2px rgb(25, 110, 238);
+  border-radius: 5px;
+  background:rgba(228, 255, 246, 0.568);
 }
 
 button:hover {
-  background:rgb(255, 200, 200);
+  background:rgba(193, 227, 255, 0.623);
 }
 
 input {
-  border: solid 2px rgb(93, 69, 226);
-  border-radius: 10px;
+  border: solid 2px rgb(25, 110, 238);
+  border-radius: 4px;
+  width: 500px;
+  height: 50px;
+  font-size: 25px;
 }
 
 textarea {

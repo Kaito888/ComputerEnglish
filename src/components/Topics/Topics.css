@@ -1,0 +1,126 @@
+.fullscreen {
+    position: fixed;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: url('./../../asserts/bg.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.topicButton {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(145, 238, 255, 0.5));
+    width: 230px;
+    height: 80px;
+}
+
+.activeTopicButton {
+    border: solid 2px rgb(54, 29, 196);
+    border-radius: 20px;
+    background-image: linear-gradient(rgba(220, 255, 255, 0.4), rgba(90, 189, 255, 0.5));
+}
+
+.exitButton {
+    left: 10px;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(185, 156, 255, 0.5));
+    border: solid 2px rgb(79, 55, 212);
+}
+
+.exitButton:hover {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(207, 156, 255, 0.5));
+    border: solid 2px rgb(110, 55, 212);
+}
+
+.unitDiv {
+    width: auto;
+    height: 700px;
+    text-align: left;
+    position: fixed;
+    left: 35%;
+    top: 150px;
+}
+
+.unitElement {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(114, 255, 189, 0.5));
+    border: solid 2px rgb(34, 160, 199);
+    margin: 50px;
+
+    width: 300px;
+    height: 180px;
+    font-size: 35px;
+}
+
+.unitElement:hover {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(114, 234, 255, 0.5));
+    border: solid 2px rgb(34, 56, 179);
+}
+
+.dictionaryElement {
+    display: flex;
+}
+
+.dictionaryWord {
+    position: inherit;
+    width: 250px;
+    height: 150px;
+    margin: 30px;
+    font-size: 25px;
+    text-align: center;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(114, 210, 255, 0.5));
+    padding: 20px;
+}
+
+.dictionaryWordPressed {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(46, 235, 156, 0.5));
+}
+
+.lessonElement {
+    flex-direction: column;
+    padding: 50px;
+    display: flex;
+}
+
+.flexElement {
+    display: flex;
+}
+
+.taskElement {
+    max-width: 1000px;
+    margin: 20px;
+}
+
+.matchWordsButton {
+    width: 230px;
+    height: 150px;
+    margin: 15px;
+    font-size: 25px;
+    border: 2px solid rgb(24, 125, 207);
+    background-color: rgb(245, 252, 255);
+}
+
+.matchWordsButtonPressed {
+    transform: scale(0.9);
+    border: 2px solid rgba(159, 166, 189, 0.336);
+    background-color: rgba(75, 82, 102, 0.603);
+}
+
+.matchWordsButtonPressed:hover {
+    transform: scale(0.9);
+    border: 2px solid rgba(159, 166, 189, 0.336);
+    background-color: rgba(75, 82, 102, 0.603);
+}
+
+.finishElement {
+    flex-direction: column;
+    display: flex;
+    position: fixed;
+    left: 30%;
+    top: 30%;
+    align-self: center;
+}
+
+.finishButton {
+    margin: 50px;
+    align-self: center;
+}
